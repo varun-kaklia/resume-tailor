@@ -1,4 +1,4 @@
-# ResumeTailor
+# ResumeTailor(Underway)
 
 Tailor your resume to a job posting in one click — without letting an AI make things up about you.
 
