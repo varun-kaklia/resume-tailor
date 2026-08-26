@@ -17,8 +17,11 @@ import {
   AMBIGUOUS_TERMS,
   CLOSING_HEADINGS,
   MUST_HEADINGS,
+  MUST_HEADING_PATTERN,
   NICE_HEADINGS,
+  NICE_HEADING_PATTERN,
   NICE_INLINE,
+  REGIONS,
   PROSE_HEADINGS,
   RESPONSIBILITY_HEADINGS,
   SKILL_TERMS,
@@ -78,7 +81,7 @@ const cleanLine = (line: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const HEADING_MAX_WORDS = 8;
+const HEADING_MAX_WORDS = 10;
 
 /**
  * A heading is short, and matches a known phrase once trailing punctuation is
@@ -90,8 +93,11 @@ const headingKind = (line: string): SectionKind | 'closing' | undefined => {
   if (text === '' || text.split(/\s+/).length > HEADING_MAX_WORDS) return undefined;
 
   const matches = (list: readonly string[]): boolean => list.some((h) => text === h || text.startsWith(`${h} `) || text.startsWith(`${h}:`));
-  if (matches(NICE_HEADINGS)) return 'nice';
-  if (matches(MUST_HEADINGS)) return 'must';
+  // Trailing-colon lines are how postings announce a section in prose form,
+  // e.g. "Candidates must be:" — matched by shape rather than exact wording.
+  const announced = line.trim().endsWith(':');
+  if (matches(NICE_HEADINGS) || (announced && NICE_HEADING_PATTERN.test(text))) return 'nice';
+  if (matches(MUST_HEADINGS) || (announced && MUST_HEADING_PATTERN.test(text))) return 'must';
   if (matches(RESPONSIBILITY_HEADINGS)) return 'responsibilities';
   if (matches(CLOSING_HEADINGS) || matches(PROSE_HEADINGS)) return 'closing';
   return undefined;
@@ -198,9 +204,14 @@ const TITLE_MAX_WORDS = 12;
  * name. Boards that render a bare title as the first line are the common case,
  * and a line naming a role and short enough to be a heading is a safe bet.
  */
-const extractTitle = (lines: readonly string[]): string | undefined => {
+const extractTitle = (lines: readonly string[], hint?: string): string | undefined => {
   const labelled = firstLabelled(lines, TITLE_LABEL);
   if (labelled !== undefined) return labelled;
+
+  // The page's own top-level heading, when the capture supplied one. Every board
+  // marks the role with an <h1>; relying on that is semantics, not a site rule.
+  const heading = hint?.trim();
+  if (heading !== undefined && heading !== '' && heading.split(/\s+/).length <= TITLE_MAX_WORDS) return heading;
 
   for (const line of lines.slice(0, 8)) {
     const words = line.split(/\s+/).length;
@@ -235,15 +246,25 @@ const WORK_MODE: readonly (readonly [RegExp, WorkMode])[] = [
 const extractWorkMode = (text: string): WorkMode | undefined =>
   WORK_MODE.find(([pattern]) => pattern.test(text))?.[1];
 
-const PLACE = /\b([A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*),\s*([A-Z]{2}\b|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/;
+const PLACE = /\b([A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*),\s*([A-Za-z]{2,}(?:\s+[A-Z][a-z]+)?)/g;
 
+/**
+ * A place is only a place when the half after the comma names a real region.
+ *
+ * Without that check, "Backend Engineer, Platform" and "Fellows Program, AI
+ * Safety" both read as `City, ST`, and a job title ends up in the location
+ * field. Both were seen on live postings.
+ */
 const extractLocation = (lines: readonly string[]): string | undefined => {
   const labelled = firstLabelled(lines, LOCATION_LABEL);
   if (labelled !== undefined) return labelled;
 
   for (const line of lines.slice(0, 12)) {
-    const match = PLACE.exec(line);
-    if (match !== null) return `${match[1] ?? ''}, ${match[2] ?? ''}`;
+    for (const match of line.matchAll(PLACE)) {
+      const city = match[1] ?? '';
+      const region = (match[2] ?? '').trim();
+      if (REGIONS.has(region.toLowerCase())) return `${city}, ${region}`;
+    }
   }
   return undefined;
 };
@@ -312,7 +333,7 @@ export const extractJobSpec = (posting: JobPosting): Extraction => {
   const sections = splitSections(lines);
   const body = lines.join('\n');
 
-  const title = extractTitle(lines);
+  const title = extractTitle(lines, posting.titleHint);
   const requirements = requirementsFrom(sections);
   const company = extractCompany(lines);
   const location = extractLocation(lines);

@@ -14,6 +14,14 @@ export interface JobPosting {
   readonly url?: string;
   readonly capturedAt: string;
   /**
+   * The page's own top-level heading, when it had one.
+   *
+   * Boards mark the role with an `<h1>`, and many titles carry no word that
+   * identifies them as a role at all, so text scanning alone misses them.
+   * Reading the heading is semantics, not a per-site rule.
+   */
+  readonly titleHint?: string;
+  /**
    * How the text was obtained. Surfaced in the UI so the user knows whether to
    * trust the capture or select the text themselves.
    */

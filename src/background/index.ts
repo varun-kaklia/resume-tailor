@@ -18,6 +18,28 @@ import { loadJobSpecCache, saveJobSpecCache } from '../shared/storage';
 
 const CONTENT_SCRIPT = 'content.js';
 
+const BADGE = {
+  ok: { text: '\u2713', color: '#1a7f37' },
+  fail: { text: '!', color: '#b42318' },
+} as const;
+
+/**
+ * The only feedback the extension gives until the popup exists.
+ *
+ * Without it a click does nothing observable, which is indistinguishable from
+ * the extension being broken.
+ */
+const report = (outcome: 'ok' | 'fail', title: string): void => {
+  try {
+    const { text, color } = BADGE[outcome];
+    action().setBadgeText({ text });
+    action().setBadgeBackgroundColor({ color });
+    action().setTitle({ title });
+  } catch {
+    // Badge support is cosmetic; never let it break a successful capture.
+  }
+};
+
 const handlePosting = async (message: unknown): Promise<void> => {
   if (!isPostingCaptured(message)) return;
 
@@ -37,8 +59,11 @@ const handlePosting = async (message: unknown): Promise<void> => {
       needsModel: needsModelFallback({ spec, confidence, gaps }),
       source: message.posting.source,
     });
+    report('ok', `Captured: ${spec.title} (${spec.requirements.length} requirements)`);
   } catch (thrown) {
-    console.warn('[ResumeTailor]', isAppError(thrown) ? thrown.userMessage : thrown);
+    const why = isAppError(thrown) ? thrown.userMessage : 'Could not read this posting.';
+    console.warn('[ResumeTailor]', why);
+    report('fail', why);
   }
 };
 
@@ -52,5 +77,6 @@ action().onClicked.addListener((tab) => {
     .executeScript({ target: { tabId: tab.id }, files: [CONTENT_SCRIPT] })
     .catch((thrown: unknown) => {
       console.warn('[ResumeTailor] cannot read this page', thrown);
+      report('fail', 'This page cannot be read. Try selecting the description text first.');
     });
 });

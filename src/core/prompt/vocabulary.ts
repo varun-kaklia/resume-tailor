@@ -80,6 +80,30 @@ export const AMBIGUOUS_TERMS: ReadonlySet<string> = new Set(['go', 'c', 'r', 're
 /** Nearby words that make an ambiguous term readable as a technology. */
 export const TECH_CONTEXT = /\b(experience|proficien\w*|knowledge|skills?|language|framework|stack|program\w*|develop\w*|engineer\w*|writ\w*|cod\w*|using|with|in)\b/i;
 
+/**
+ * Regional codes and country names that can legitimately follow a comma in a
+ * location line.
+ *
+ * Without this, `City, ST` matching accepts any capitalised word after a comma,
+ * so a title like "Backend Engineer, Platform" reads as a place. Validating the
+ * second half against real regions is what separates the two.
+ */
+export const REGIONS: ReadonlySet<string> = new Set([
+  // US states and DC
+  'al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'dc', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia',
+  'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm',
+  'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa',
+  'wv', 'wi', 'wy',
+  // Canadian provinces
+  'ab', 'bc', 'mb', 'nb', 'nl', 'ns', 'nt', 'nu', 'on', 'pe', 'qc', 'sk', 'yt',
+  // Countries and common abbreviations
+  'usa', 'us', 'uk', 'can', 'canada', 'england', 'scotland', 'wales', 'ireland', 'france',
+  'germany', 'spain', 'portugal', 'italy', 'netherlands', 'belgium', 'sweden', 'norway',
+  'denmark', 'finland', 'poland', 'switzerland', 'austria', 'australia', 'india', 'singapore',
+  'japan', 'china', 'brazil', 'mexico', 'israel', 'united states', 'united kingdom', 'remote',
+  'new zealand', 'south africa', 'argentina', 'chile', 'colombia', 'philippines', 'vietnam',
+]);
+
 /** Section headings introducing hard requirements. */
 export const MUST_HEADINGS = [
   'requirements', 'required', 'qualifications', 'basic qualifications', 'minimum qualifications',
@@ -88,12 +112,24 @@ export const MUST_HEADINGS = [
   'technical skills', 'required skills', 'essential',
 ];
 
+/**
+ * Heading shapes that phrase lists cannot cover.
+ *
+ * Real postings write "Candidates must be:", "Across the workstreams, you may
+ * be a good fit if you:" and similar. Matching the shape rather than the exact
+ * wording catches these without a per-site rule.
+ */
+export const MUST_HEADING_PATTERN = /\b(candidates? (?:must|should|will|need)|you (?:must|should|will) (?:have|be)|good fit if|we(?:'re| are)? looking for|what we(?:'re| are)? looking for|(?:minimum|basic|required) qualifications|skills? (?:and|&) (?:experience|qualifications))\b/i;
+
 /** Section headings introducing optional extras. */
 export const NICE_HEADINGS = [
   'nice to have', 'nice-to-have', 'preferred', 'preferred qualifications', 'bonus',
   'bonus points', 'desired', 'a plus', 'pluses', 'good to have', 'additionally',
   'preferred skills', 'even better', 'icing on the cake',
 ];
+
+/** Heading shapes introducing optional extras, for the same reason as the must pattern. */
+export const NICE_HEADING_PATTERN = /\b(strong candidates|bonus points|(?:also|additionally) (?:have|nice)|even better if|stand ?out|extra credit|would be (?:a )?(?:plus|bonus))\b/i;
 
 /** Section headings introducing day-to-day duties. */
 export const RESPONSIBILITY_HEADINGS = [

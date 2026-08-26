@@ -59,7 +59,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] Heuristic keyword pass runs first; LLM call only fills gaps (token budget)
 - [x] Cache `JobSpec` by source hash — re-tailoring the same posting costs zero tokens
 - [x] Tests: fixture DOM → JobSpec end to end
-- [ ] Verify extraction against live LinkedIn / Indeed / Greenhouse / Lever / Workday pages
+- [x] Verify extraction against live Greenhouse / Lever / Workday / LinkedIn pages
+- [ ] Re-verify LinkedIn and Indeed while signed in, where the description is actually delivered
+- [ ] Ashby and SmartRecruiters spot check
 
 ---
 
@@ -104,6 +106,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [ ] MV3 manifest, one source, per-browser build targets (Chrome / Firefox / Edge)
 - [ ] Firefox: `browser.*` polyfill + background page fallback
 - [ ] Popup: capture → tailor → review → export, four states, no dead ends
+- [ ] Manual paste/selection as a primary capture route, not a fallback (D-045)
 - [ ] Every `AppError` code has a written user-facing message
 - [ ] Store listings, privacy policy ("your key and data never leave your browser except to your chosen provider")
 - [ ] CI: typecheck + test + build all three targets

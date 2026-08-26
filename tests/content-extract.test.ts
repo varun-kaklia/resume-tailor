@@ -158,4 +158,65 @@ describe('extractPosting', () => {
 
     expect(doc.body.innerHTML).toBe(before);
   });
+
+  it('prefers a heading inside the posting over site branding outside it', () => {
+    // A careers site puts its own name in an h1 above the posting.
+    const branded = `
+      <body>
+        <div class="masthead"><h1>CAREERS AT EXAMPLE CORP</h1></div>
+        <div class="job"><h2>Senior QA Engineer</h2>${REQUIREMENTS}</div>
+      </body>
+    `;
+
+    expect(extractPosting(parse(branded)).titleHint).toBe('Senior QA Engineer');
+  });
+
+  it('rejects an all-capitals heading as branding rather than a title', () => {
+    const shouty = `<body><div class="job"><h1>CAREERS AT EXAMPLE CORP</h1>${REQUIREMENTS}</div></body>`;
+
+    expect(extractPosting(parse(shouty)).titleHint).toBeUndefined();
+  });
+
+  it('rejects a heading that does not appear in the posting text', () => {
+    // Overlays injected over the page (a translation panel, for one) own headings
+    // that belong to no posting.
+    const overlaid = `
+      <body>
+        <div class="overlay" aria-hidden="true"><h1>Original text</h1></div>
+        <div class="job"><h2>Platform Engineer</h2>${REQUIREMENTS}</div>
+      </body>
+    `;
+
+    expect(extractPosting(parse(overlaid)).titleHint).toBe('Platform Engineer');
+  });
+
+  it('does not let interface chrome outscore a real posting', () => {
+    // Scoring counts only what extraction keeps, so a panel padded with buttons
+    // and form labels cannot beat prose of the same apparent size.
+    const chrome = Array.from({ length: 30 }, (_, i) => `<button>Suggestion number ${i} for your search</button>`).join('');
+    const page = `
+      <body>
+        <div class="typeahead">${chrome}</div>
+        <div class="posting"><h2>Backend Engineer</h2>${REQUIREMENTS}</div>
+      </body>
+    `;
+    const { text } = extractPosting(parse(page));
+
+    expect(text).toContain('Kubernetes');
+    expect(text).not.toContain('Suggestion number');
+  });
+
+  it('refuses a page that withholds the description instead of returning its chrome', () => {
+    // Some boards render the posting only for signed-in visitors.
+    const gated = `
+      <body>
+        <div class="header"><h1>Frontend Engineer</h1></div>
+        <div class="wall"><p>Sign in to view this job.</p></div>
+      </body>
+    `;
+
+    expect(() => extractPosting(parse(gated))).toThrowError(
+      expect.objectContaining({ code: 'JD_NOT_FOUND' }) as Error,
+    );
+  });
 });

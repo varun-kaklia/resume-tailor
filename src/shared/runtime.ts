@@ -26,6 +26,9 @@ export interface ActionApi {
   readonly onClicked: {
     addListener(listener: (tab: { id?: number; url?: string }) => void): void;
   };
+  setBadgeText(details: { text: string; tabId?: number }): void;
+  setBadgeBackgroundColor(details: { color: string; tabId?: number }): void;
+  setTitle(details: { title: string; tabId?: number }): void;
 }
 
 interface ExtensionGlobal {

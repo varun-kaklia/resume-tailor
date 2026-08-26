@@ -186,6 +186,23 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 
 ---
 
+### D-042 — Container scoring counts only the text extraction will keep
+**Why:** scoring used `textContent`, which includes nav, buttons and form labels that `blockText` then drops, so a container full of interface chrome scored as if it were prose. Observed live: a search typeahead outscored the job description on a real posting page, and the capture returned "0 notifications / Search / suggestions available". Scoring now runs on the same furniture-aware walk as extraction, memoised per element.
+
+### D-043 — A title hint is only trusted if it looks like a title
+**Why:** the first `h1` is often not the role. Two live failures: a careers site whose `h1` is `CAREERS AT <COMPANY>`, and a page carrying a translation overlay whose `h1` was "Original text". The hint is now taken from inside the chosen container first — a heading within the posting names the role, one outside it usually names the employer — and rejected when it is all-capitals or absent from the extracted text.
+**Trade-off:** a genuinely all-capitals job title is rejected and falls back to text scanning. Rare, and recoverable.
+
+### D-044 — Capture refuses below `MIN_JD_CHARS` rather than returning page chrome
+**Why:** some boards render the description only for signed-in visitors. Returning the surrounding interface produced a plausible-length but meaningless result that parsed into a confident, wrong `JobSpec`. Sharing the existing threshold rather than inventing a second one keeps one number, and failing at capture reports `JD_NOT_FOUND`, whose recovery action points at manual selection — the actual fix.
+
+### D-045 — Some boards cannot be captured automatically, and that is not fixable here
+**Why:** on a signed-out LinkedIn posting the description is not in the DOM at all; the largest container on the page held 1.6 kB of interface. No extraction heuristic can recover text that was never delivered. Manual selection is the answer, which makes it a primary path in the UI rather than a fallback.
+
+### D-046 — Live verification changed what the fixtures were worth
+**Why:** every defect above passed the fixture suite. The fixtures encoded assumptions about how boards are built, and shared those assumptions with the code that was tested against them. Four boards were checked with the real shipped extractor — Greenhouse (server-rendered, two postings), Lever, Workday, and a signed-out LinkedIn posting — and each defect found now has a regression test written from the live shape rather than from the assumption.
+
+
 ## Known unknowns
 
 - Whether generic JD extraction actually works across LinkedIn, Indeed, Greenhouse, Lever and Workday without per-site adapters. Fixture tests in Phase 2 answer this. The manual-paste fallback exists because the answer may be no.
