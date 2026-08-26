@@ -20,7 +20,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] `README.md`, `CONTRIBUTING.md`, `.env.example`, `.gitignore`
 - [x] `src/core/types/*` — Profile, JobSpec, TailoringPlan, IAIProvider, errors
 - [x] `package.json` + `tsconfig.json` (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`)
-- [ ] `vite.config.ts` + MV3 manifest — deferred to Phase 5: there are no entry points to build yet
+- [x] `config/vite.*.config.ts` + MV3 manifest — builds to `dist/chrome`, loads unpacked
 - [ ] `npm run typecheck` green in CI
 
 ---
@@ -47,14 +47,19 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 **Goal:** one click on a job posting yields a compact `JobSpec`.
 **Success criteria:** LinkedIn / Indeed / Greenhouse / Lever / Workday parse without a per-site adapter; unknown sites fall back to selected text, and the user is told which path was used.
 
-- [ ] `src/content/extract.ts` — generic readable-region extraction, no per-site selectors
-- [ ] Fallback: user selects text → context menu → capture
+- [x] `src/content/extract.ts` — generic readable-region extraction, no per-site selectors
+- [x] `src/content/index.ts` — injected on toolbar click, captures once, sends to background
+- [x] `src/background/index.ts` — injects on click, runs the job-spec pipeline, caches by hash
+- [x] `src/shared/{runtime,messages}.ts` — extension API access and the message contract
+- [x] Fallback: user selects text before clicking → selection wins over page scoring
+- [ ] Context-menu entry as a second route to capture
 - [x] `src/core/prompt/vocabulary.ts` — skill terms, section headings, ambiguity guards
 - [x] `src/core/prompt/jobspec.ts` — JD text → `JobSpec`, heuristics only, zero tokens
 - [x] `src/core/prompt/jobspec-fallback.ts` — gap-filling model call for unstructured postings
 - [x] Heuristic keyword pass runs first; LLM call only fills gaps (token budget)
-- [ ] Cache `JobSpec` by URL hash — re-tailoring the same posting costs zero tokens
-- [ ] Tests: fixture HTML from 5 boards → non-empty JobSpec
+- [x] Cache `JobSpec` by source hash — re-tailoring the same posting costs zero tokens
+- [x] Tests: fixture DOM → JobSpec end to end
+- [ ] Verify extraction against live LinkedIn / Indeed / Greenhouse / Lever / Workday pages
 
 ---
 

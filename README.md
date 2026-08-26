@@ -1,10 +1,10 @@
-# ResumeTailor(Underway)
+# resume-tailor
 
 Tailor your resume to a job posting in one click — without letting an AI make things up about you.
 
 ResumeTailor keeps one **Structured Profile** of your real experience. For each job posting, it selects and rephrases *only what is already in that profile* into a one-page LaTeX resume. You bring your own API key and pick your own model. Nothing leaves your browser except the request you chose to make.
 
-> **Status: foundation.** The architecture, data model and interfaces are in place; the extension does not build yet. See [docs/TODO.md](docs/TODO.md).
+> **Status: early.** The extension builds and installs, and can capture a job posting from a page. There is no user interface yet — no profile editor, no tailoring flow. See [docs/TODO.md](docs/TODO.md).
 
 ---
 
@@ -67,21 +67,23 @@ Your key is stored in the browser's extension storage on this machine. It is **n
 
 ## Install
 
-Not yet published to the extension stores. Once builds land (see [docs/TODO.md](docs/TODO.md)):
+Not yet published to the extension stores. Build it yourself:
 
 ```bash
 git clone https://github.com/varun-kaklia/resume-tailor.git
 cd resume-tailor
 npm install
+npm run build            # outputs dist/chrome
 npm run check            # typecheck + tests
 ```
 
-The extension build (`npm run build:chrome` and friends) does not exist yet — there
-are no UI entry points to bundle. Progress is tracked in [docs/TODO.md](docs/TODO.md).
+Load it at `chrome://extensions` → enable **Developer mode** → **Load unpacked** →
+select `dist/chrome`.
 
-Once the build lands, `dist/chrome` loads as an unpacked extension at
-`chrome://extensions` with Developer mode on; Firefox loads `dist/firefox/manifest.json`
-via `about:debugging`.
+Clicking the toolbar icon on a job posting captures it: the page is parsed into a
+`JobSpec` locally, at no token cost, and cached. Open the service worker console
+from `chrome://extensions` to see what was read. The tailoring flow that consumes
+it is not built yet — progress is tracked in [docs/TODO.md](docs/TODO.md).
 
 ---
 

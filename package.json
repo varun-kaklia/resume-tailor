@@ -4,15 +4,29 @@
   "private": true,
   "description": "Browser extension that tailors your resume to a job posting from a structured profile, using your own AI provider key. Never invents content.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/varun-kaklia/resume-tailor.git" },
-  "bugs": { "url": "https://github.com/varun-kaklia/resume-tailor/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/varun-kaklia/resume-tailor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/varun-kaklia/resume-tailor/issues"
+  },
   "homepage": "https://github.com/varun-kaklia/resume-tailor#readme",
-  "keywords": ["resume", "browser-extension", "manifest-v3", "latex", "job-search", "bring-your-own-key"],
+  "keywords": [
+    "resume",
+    "browser-extension",
+    "manifest-v3",
+    "latex",
+    "job-search",
+    "bring-your-own-key"
+  ],
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "build": "npm run build:chrome",
+    "build:chrome": "vite build --config config/vite.content.config.ts && vite build --config config/vite.background.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -20,7 +34,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
+    "happy-dom": "^15.11.7",
     "typescript": "^5.6.0",
+    "vite": "^5.4.21",
     "vitest": "^2.1.0"
   }
 }

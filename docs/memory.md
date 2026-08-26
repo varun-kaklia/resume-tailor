@@ -157,9 +157,22 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 ### D-036 — New `JobSpec` fields are not automatically prompt fields
 **Why:** `responsibilities`, `location`, `workMode` and `minYearsExperience` exist for the review UI and local scoring. `responsibilities` is the longest field in the spec and the requirements already carry what the model needs to judge relevance, so sending it would be paid-for noise. Same allowlist discipline as D-025, enforced by a test that fails if any of them reaches the wire.
 
----
+### D-037 — Page extraction scores containers, it does not select them
+**Why:** job boards restructure their markup often, so a table of CSS paths is broken maintenance work by definition (R-05). Candidates are scored on the shape of their content instead: text length, discounted by link density, rewarded for paragraph and list-item count, adjusted by class and id hints. Nav rails and "related jobs" panels are mostly link text, which is what separates them from a posting body of similar length.
+**Consequence:** extraction is only proven against fixture DOMs. Live boards are the real test and have not been run.
 
-## Deferred, with the reason
+### D-038 — Extraction preserves line structure
+**Why:** `textContent` flattens a document to one string, and `jobspec.ts` reads headings and bullet lists to decide must vs nice. Flattening would silently disable the entire section classifier while still returning plausible text. Block-level tags become newlines; the page itself is never mutated, since the extension is a guest on someone else's document.
+
+### D-039 — The content script is injected on click, not declared
+**Why:** a declared content script needs host permissions for every site it might run on. Injecting via `scripting.executeScript` under `activeTab` means the extension can only read a page the user explicitly acted on, asks for no host permissions at install time, and gives store reviewers nothing to object to (architecture §11).
+**Consequence:** capture requires a click. That is the intended interaction anyway.
+
+### D-040 — Both bundles are IIFE, and there is no polyfill
+**Why:** Chrome does not load content scripts as ES modules, and building the worker the same way keeps the manifest free of `"type": "module"` and lets Firefox's event page load the identical file. `shared/runtime.ts` resolves `chrome`/`browser` structurally off `globalThis`, matching what `shared/storage.ts` already does — adding `webextension-polyfill` now would mean two mechanisms for one job. This narrows D-011 to its intent rather than its letter.
+
+### D-041 — `happy-dom` added as a dev dependency
+**Why:** testing a readability algorithm without a DOM is not reasonable, and the alternative — contorting the extractor to run against a hand-rolled node interface — would make the production code worse to keep the test dependency count down. Dev-only; nothing ships with it.
 
 | Thing | Why not now |
 |-------|-------------|
