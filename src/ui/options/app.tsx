@@ -39,7 +39,7 @@ const Field = ({
   </label>
 );
 
-export const App = () => {
+export const SettingsPanel = () => {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [loaded, setLoaded] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -95,8 +95,8 @@ export const App = () => {
   if (!loaded) return <p class="loading">Loading…</p>;
 
   return (
-    <main>
-      <h1>ResumeTailor settings</h1>
+    <div>
+      <h1>Settings</h1>
       <p class="lead">
         Bring your own key. Requests go from this browser straight to the provider you choose — there is no server in
         between.
@@ -171,6 +171,6 @@ export const App = () => {
           rather not store a key at all, point ResumeTailor at a local model instead.
         </p>
       </section>
-    </main>
+    </div>
   );
 };

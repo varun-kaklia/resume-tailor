@@ -215,6 +215,18 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 ### D-050 — UI pages build as HTML entries with a relative base
 **Why:** extension pages load from a `chrome-extension://` origin where absolute asset paths do not resolve, so `base: './'` is required, not cosmetic. Output is `options.html` rather than `index.html` because the popup will want the same generic name and they share one output directory.
 
+### D-051 — The editor validates with the real profile validator
+**Why:** the editor calls `validateProfile` and renders its `FieldIssue` paths beside the matching fields, rather than carrying a second set of rules. One definition of a valid profile, and a field the editor accepts cannot be rejected by storage.
+
+### D-052 — Removal never renumbers
+**Why:** ids are permanent (invariant 4). Deleting the second of three roles leaves the third holding `e3`, and the next role added takes `e4`. Renumbering would silently invalidate any cached `TailoringPlan` that referenced them.
+
+### D-053 — `Patch<T>` exists so optional fields can be cleared
+**Why:** `Partial<T>` cannot express "set this back to absent" under `exactOptionalPropertyTypes`, and clearing an optional note or project link is an ordinary editing action. `Patch<T>` allows an explicit `undefined` where `Partial` would not.
+
+### D-054 — Validation messages appear only after the user acts
+**Why:** an empty profile is invalid by definition, so validating on load would open the editor covered in complaints about fields nobody has reached yet. Issues surface on the first save attempt and stay live after that.
+
 ## Known unknowns
 
 - Whether generic JD extraction actually works across LinkedIn, Indeed, Greenhouse, Lever and Workday without per-site adapters. Fixture tests in Phase 2 answer this. The manual-paste fallback exists because the answer may be no.

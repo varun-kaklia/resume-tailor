@@ -35,8 +35,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] User-authored role notes (`Experience.note`) — validated, rendered verbatim, never model-visible
 - [x] `src/shared/storage.ts` — `chrome.storage.local` wrapper, typed, quota-aware
 - [x] Options page: BYOK settings — provider, model, key, base URL, live connection test
-- [ ] Options page: profile editor (contact, education, experience, projects, skills)
-- [ ] Options page: per-role note field, with the character budget shown as the user types
+- [x] Options page: profile editor (contact, education, experience, projects, skills) — round-trip editing
+- [ ] Profile editor: reordering roles, projects and bullets
+- [x] Options page: per-role note field, with the character budget shown as the user types
 - [ ] Import: paste existing resume text → draft profile (single LLM call, user confirms every field)
 - [ ] Export/import profile as JSON (user owns their data)
 - [ ] Tests: round-trip persistence, note round-trip, ID stability across edits

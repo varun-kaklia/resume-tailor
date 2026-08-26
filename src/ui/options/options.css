@@ -99,3 +99,95 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 
 .note p { margin: 0; }
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.75rem;
+}
+
+.tab {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+}
+
+.tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+
+.group { margin-bottom: 2.25rem; }
+.group > h2 { font-size: 1.05rem; margin: 0 0 0.9rem; }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.9rem;
+  background: var(--surface);
+}
+
+.card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.card-id {
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+}
+
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+textarea {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  resize: vertical;
+}
+
+.budget { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+
+.bullets { margin-top: 0.4rem; }
+.bullet { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; margin-bottom: 0.5rem; align-items: start; }
+.bullet .field-issue { grid-column: 1 / -1; }
+
+button.remove {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.6rem;
+  font-weight: 500;
+}
+
+button.remove:hover { color: var(--error); border-color: var(--error); }
+button.small { padding: 0.35rem 0.7rem; font-size: 0.88rem; }
+
+.actions.sticky {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  padding: 0.9rem 0;
+  margin-top: 2rem;
+  align-items: center;
+}
+
+.actions.sticky .status { margin: 0; padding: 0.35rem 0.6rem; }
+
+@media (max-width: 30rem) {
+  .pair { grid-template-columns: 1fr; }
+}
