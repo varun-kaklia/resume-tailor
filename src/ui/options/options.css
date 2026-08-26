@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #16181d;
+  --muted: #5b6472;
+  --line: #d8dde5;
+  --accent: #1f6feb;
+  --ok: #1a7f37;
+  --error: #b42318;
+  --surface: #f6f8fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181d;
+    --fg: #e6e9ef;
+    --muted: #9aa4b2;
+    --line: #2d323b;
+    --accent: #4c8dff;
+    --ok: #3fb950;
+    --error: #ff7b72;
+    --surface: #1d2027;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 2.5rem 1.5rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main { max-width: 34rem; margin: 0 auto; }
+
+h1 { font-size: 1.4rem; margin: 0 0 0.4rem; }
+h2 { font-size: 0.95rem; margin: 0 0 0.4rem; }
+
+.lead { color: var(--muted); margin: 0 0 1.75rem; }
+.loading { color: var(--muted); text-align: center; padding: 3rem 0; }
+
+.field { display: block; margin-bottom: 1.15rem; }
+.field-label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+.field-hint, .field-issue { display: block; font-size: 0.85rem; margin-top: 0.3rem; }
+.field-hint { color: var(--muted); }
+.field-issue { color: var(--error); }
+
+input, select {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
+
+button {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary { background: transparent; color: var(--fg); border-color: var(--line); }
+button:disabled { opacity: 0.55; cursor: default; }
+
+.status {
+  margin-top: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: var(--surface);
+  border-left: 3px solid var(--muted);
+}
+
+.status-ok { border-left-color: var(--ok); }
+.status-error { border-left-color: var(--error); }
+.status-busy { color: var(--muted); }
+
+.note {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.note p { margin: 0; }

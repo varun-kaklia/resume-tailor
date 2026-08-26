@@ -203,6 +203,18 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 **Why:** every defect above passed the fixture suite. The fixtures encoded assumptions about how boards are built, and shared those assumptions with the code that was tested against them. Four boards were checked with the real shipped extractor — Greenhouse (server-rendered, two postings), Lever, Workday, and a signed-out LinkedIn posting — and each defect found now has a regression test written from the live shape rather than from the assumption.
 
 
+### D-047 — Settings offers only providers that have an implementation
+**Why:** `ProviderId` names four providers and `src/providers` serves two. Listing Anthropic or Gemini would let a user save a configuration that passes every check and then fails at tailoring time, which is the worst moment to discover it. `PROVIDER_OPTIONS` is the list of what actually works, and a test builds each entry through the registry so the two cannot drift apart.
+
+### D-048 — The connection test uses the real tailoring path
+**Why:** "Test connection" builds a provider from the draft and calls the same `validate()` tailoring calls (D-015). A passing test therefore means the configuration works where it matters, rather than meaning a separate check passed.
+
+### D-049 — Form validation lives outside the component
+**Why:** `draft.ts` holds the rules and `app.tsx` renders them, so what makes a configuration usable is testable without a DOM, and the same rules gate both Save and Test. Field issues stay hidden until the user acts, so an untouched form does not open covered in complaints.
+
+### D-050 — UI pages build as HTML entries with a relative base
+**Why:** extension pages load from a `chrome-extension://` origin where absolute asset paths do not resolve, so `base: './'` is required, not cosmetic. Output is `options.html` rather than `index.html` because the popup will want the same generic name and they share one output directory.
+
 ## Known unknowns
 
 - Whether generic JD extraction actually works across LinkedIn, Indeed, Greenhouse, Lever and Workday without per-site adapters. Fixture tests in Phase 2 answer this. The manual-paste fallback exists because the answer may be no.

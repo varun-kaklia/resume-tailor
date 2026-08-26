@@ -3,10 +3,25 @@
   "name": "ResumeTailor",
   "version": "0.1.0",
   "description": "Tailor your resume to a job posting from a structured profile, using your own AI provider key.",
-  "permissions": ["storage", "activeTab", "scripting"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_title": "Capture this job posting" },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Capture this job posting"
+  },
   "browser_specific_settings": {
-    "gecko": { "id": "resume-tailor@varun-kaklia.github.io", "strict_min_version": "115.0" }
+    "gecko": {
+      "id": "resume-tailor@varun-kaklia.github.io",
+      "strict_min_version": "115.0"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   }
 }

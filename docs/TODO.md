@@ -34,6 +34,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] `src/core/profile/ids.ts` — stable short IDs (`e1`, `e1b3`) assigned on create, never reassigned
 - [x] User-authored role notes (`Experience.note`) — validated, rendered verbatim, never model-visible
 - [x] `src/shared/storage.ts` — `chrome.storage.local` wrapper, typed, quota-aware
+- [x] Options page: BYOK settings — provider, model, key, base URL, live connection test
 - [ ] Options page: profile editor (contact, education, experience, projects, skills)
 - [ ] Options page: per-role note field, with the character budget shown as the user types
 - [ ] Import: paste existing resume text → draft profile (single LLM call, user confirms every field)
@@ -74,7 +75,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] `src/providers/openai-compatible.ts` — Ollama / LM Studio / OpenRouter, the zero-cost path
 - [x] `src/providers/registry.ts` — pick provider from settings, no `switch` in call sites
 - [x] `src/core/tailor.ts` — the pipeline: unknown ids → evidence → XYZ → fit → render
-- [ ] `src/providers/anthropic.ts`, `src/providers/gemini.ts`
+- [ ] `src/providers/anthropic.ts`, `src/providers/gemini.ts` — settings lists only implemented providers, so these unlock themselves
 - [x] `src/core/prompt/profile-index.ts` — allowlist build of `ProfileIndex`; notes, employers, dates and contact details cannot reach a provider
 - [x] `src/core/prompt/messages.ts` — line-oriented prompt in, JSON out; fixed system message so it caches
 - [x] `src/core/prompt/parse.ts` — response → `TailoringPlan`, recovering fences and surrounding prose
