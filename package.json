@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "npm run build:chrome",
-    "build:chrome": "vite build --config config/vite.content.config.ts && vite build --config config/vite.background.config.ts && vite build --config config/vite.options.config.ts",
+    "build:chrome": "vite build --config config/vite.content.config.ts && vite build --config config/vite.background.config.ts && vite build --config config/vite.options.config.ts && vite build --config config/vite.popup.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

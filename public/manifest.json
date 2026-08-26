@@ -12,7 +12,8 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Capture this job posting"
+    "default_title": "ResumeTailor",
+    "default_popup": "popup.html"
   },
   "browser_specific_settings": {
     "gecko": {

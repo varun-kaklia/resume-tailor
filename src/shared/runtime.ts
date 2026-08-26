@@ -12,10 +12,17 @@ import { AppError } from '../core/types';
 
 export interface RuntimeApi {
   sendMessage(message: unknown): Promise<unknown>;
+  openOptionsPage?(): void;
   readonly onMessage: {
-    addListener(listener: (message: unknown, sender: unknown) => void): void;
+    addListener(
+      listener: (message: unknown, sender: unknown, respond: (reply: unknown) => void) => boolean | void,
+    ): void;
   };
   readonly lastError?: { message?: string } | undefined;
+}
+
+export interface TabsApi {
+  query(filter: { active: boolean; currentWindow: boolean }): Promise<{ id?: number; url?: string; title?: string }[]>;
 }
 
 export interface ScriptingApi {
@@ -35,6 +42,7 @@ interface ExtensionGlobal {
   readonly runtime?: RuntimeApi;
   readonly scripting?: ScriptingApi;
   readonly action?: ActionApi;
+  readonly tabs?: TabsApi;
 }
 
 const host = (): ExtensionGlobal | undefined => {
@@ -55,3 +63,4 @@ const require$ = <T>(value: T | undefined, name: string): T => {
 export const runtime = (): RuntimeApi => require$(host()?.runtime, 'runtime');
 export const scripting = (): ScriptingApi => require$(host()?.scripting, 'scripting');
 export const action = (): ActionApi => require$(host()?.action, 'action');
+export const tabs = (): TabsApi => require$(host()?.tabs, 'tabs');

@@ -1,82 +1,92 @@
 /**
  * Background service worker.
  *
- * Two jobs for now: inject the content script when the toolbar icon is clicked,
- * and run whatever it captures through the job-spec pipeline, caching the
- * result by source hash so the same posting is never parsed twice.
- *
- * Network calls will live here too — a service worker is the only place in the
- * extension allowed to make them — but nothing here calls a provider yet. The
- * heuristic path costs no tokens, so capture stays free until tailoring exists.
+ * Owns the two things a page cannot do safely: injecting the reader into the
+ * active tab, and making the one network call the extension makes. Tailoring
+ * runs here so that closing the popup does not abandon a request the user has
+ * already paid for.
  */
 
 import { extractJobSpec, needsModelFallback } from '../core/prompt/jobspec';
-import { isAppError } from '../core/types';
-import { isPostingCaptured } from '../shared/messages';
-import { action, runtime, scripting } from '../shared/runtime';
+import { AppError, isAppError } from '../core/types';
+import { isCaptureRequest, isPostingCaptured, isTailorRequest } from '../shared/messages';
+import { runtime, scripting } from '../shared/runtime';
 import { loadJobSpecCache, saveJobSpecCache } from '../shared/storage';
+import { runTailoring } from './tailor';
+import type { CaptureResult, Reply, TailorResult } from '../shared/messages';
+import type { JobPosting } from '../core/types';
 
 const CONTENT_SCRIPT = 'content.js';
 
-const BADGE = {
-  ok: { text: '\u2713', color: '#1a7f37' },
-  fail: { text: '!', color: '#b42318' },
-} as const;
+/** How long the reader has to report back before capture is called a failure. */
+const CAPTURE_TIMEOUT_MS = 5000;
 
 /**
- * The only feedback the extension gives until the popup exists.
- *
- * Without it a click does nothing observable, which is indistinguishable from
- * the extension being broken.
+ * The injected reader reports asynchronously, so capture waits on the next
+ * posting it sends rather than on the injection call, which resolves as soon as
+ * the file is evaluated.
  */
-const report = (outcome: 'ok' | 'fail', title: string): void => {
-  try {
-    const { text, color } = BADGE[outcome];
-    action().setBadgeText({ text });
-    action().setBadgeBackgroundColor({ color });
-    action().setTitle({ title });
-  } catch {
-    // Badge support is cosmetic; never let it break a successful capture.
-  }
+let pending: ((posting: JobPosting) => void) | undefined;
+
+const nextPosting = (): Promise<JobPosting> =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      pending = undefined;
+      reject(new AppError('JD_NOT_FOUND'));
+    }, CAPTURE_TIMEOUT_MS);
+
+    pending = (posting) => {
+      clearTimeout(timer);
+      pending = undefined;
+      resolve(posting);
+    };
+  });
+
+const capture = async (tabId: number): Promise<CaptureResult> => {
+  const arrival = nextPosting();
+  await scripting().executeScript({ target: { tabId }, files: [CONTENT_SCRIPT] });
+
+  const { spec, confidence, gaps } = extractJobSpec(await arrival);
+  const cache = await loadJobSpecCache();
+  await saveJobSpecCache({ ...cache, [spec.sourceHash]: spec });
+
+  return { spec, confidence, needsModel: needsModelFallback({ spec, confidence, gaps }) };
 };
 
-const handlePosting = async (message: unknown): Promise<void> => {
-  if (!isPostingCaptured(message)) return;
-
-  try {
-    const { spec, confidence, gaps } = extractJobSpec(message.posting);
-
-    const cache = await loadJobSpecCache();
-    if (cache[spec.sourceHash] === undefined) {
-      await saveJobSpecCache({ ...cache, [spec.sourceHash]: spec });
-    }
-
-    console.info('[ResumeTailor] captured', {
-      title: spec.title,
-      requirements: spec.requirements.length,
-      confidence,
-      gaps,
-      needsModel: needsModelFallback({ spec, confidence, gaps }),
-      source: message.posting.source,
-    });
-    report('ok', `Captured: ${spec.title} (${spec.requirements.length} requirements)`);
-  } catch (thrown) {
-    const why = isAppError(thrown) ? thrown.userMessage : 'Could not read this posting.';
-    console.warn('[ResumeTailor]', why);
-    report('fail', why);
-  }
+const tailor = async (sourceHash: string, emphasis?: string): Promise<TailorResult> => {
+  const spec = (await loadJobSpecCache())[sourceHash];
+  if (spec === undefined) throw new AppError('JD_NOT_FOUND');
+  return runTailoring(spec, emphasis);
 };
 
-runtime().onMessage.addListener((message) => {
-  void handlePosting(message);
+const failed = (thrown: unknown): Reply<never> => ({
+  ok: false,
+  error: isAppError(thrown) ? thrown.userMessage : 'Something went wrong. Try again.',
 });
 
-action().onClicked.addListener((tab) => {
-  if (tab.id === undefined) return;
-  void scripting()
-    .executeScript({ target: { tabId: tab.id }, files: [CONTENT_SCRIPT] })
-    .catch((thrown: unknown) => {
-      console.warn('[ResumeTailor] cannot read this page', thrown);
-      report('fail', 'This page cannot be read. Try selecting the description text first.');
-    });
+/**
+ * Returning `true` keeps the message channel open for the async reply, which
+ * also keeps the worker alive until the work finishes.
+ */
+runtime().onMessage.addListener((message, _sender, respond) => {
+  if (isPostingCaptured(message)) {
+    pending?.(message.posting);
+    return false;
+  }
+
+  if (isCaptureRequest(message)) {
+    capture(message.tabId)
+      .then((value) => respond({ ok: true, value }))
+      .catch((thrown: unknown) => respond(failed(thrown)));
+    return true;
+  }
+
+  if (isTailorRequest(message)) {
+    tailor(message.sourceHash, message.emphasis)
+      .then((value) => respond({ ok: true, value }))
+      .catch((thrown: unknown) => respond(failed(thrown)));
+    return true;
+  }
+
+  return false;
 });

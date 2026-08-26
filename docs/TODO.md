@@ -97,8 +97,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] `templates/faangpath-simple.tex` — font/size/margin knobs at the very top
 - [x] `src/core/render/latex.ts` — plan + profile → `.tex`, escaping user text
 - [ ] `src/core/render/fit.ts` — line-budget estimator, returns `over | tight | ok`
-- [ ] Overflow UX: show what to cut, never silently truncate
-- [ ] `.tex` download + copy-to-clipboard + "Open in Overleaf" link
+- [ ] Overflow UX: show what to cut, never silently truncate — `over` currently blocks export with a message only
+- [x] `.tex` download + copy-to-clipboard
+- [ ] "Open in Overleaf" link
 - [ ] Tests: escaping (`&`, `%`, `_`, `#`), fit estimator against known-good resumes
 
 ---
@@ -107,8 +108,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 
 - [ ] MV3 manifest, one source, per-browser build targets (Chrome / Firefox / Edge)
 - [ ] Firefox: `browser.*` polyfill + background page fallback
-- [ ] Popup: capture → tailor → review → export, four states, no dead ends
-- [ ] Manual paste/selection as a primary capture route, not a fallback (D-045)
+- [x] Popup: capture → tailor → review → export, four states, no dead ends
+- [x] Selection-first capture (select text, then capture) with an inline hint on failure
+- [ ] Paste-a-description box in the popup, for pages the reader cannot see at all (D-045)
 - [ ] Every `AppError` code has a written user-facing message
 - [ ] Store listings, privacy policy ("your key and data never leave your browser except to your chosen provider")
 - [ ] CI: typecheck + test + build all three targets

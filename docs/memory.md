@@ -227,6 +227,18 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 ### D-054 — Validation messages appear only after the user acts
 **Why:** an empty profile is invalid by definition, so validating on load would open the editor covered in complaints about fields nobody has reached yet. Issues surface on the first save attempt and stay live after that.
 
+### D-055 — Tailoring runs in the worker, not the popup
+**Why:** a popup closes the moment focus moves, and a tailoring call takes several seconds the user has already paid for. Running it in the worker means closing the popup cannot abandon the request. It also keeps the single network call in the one place the architecture allows it (§11). The worker replies asynchronously and returns `true` from the listener, which holds the channel open and keeps the worker alive until the work finishes.
+
+### D-056 — Declaring a popup removed the badge path
+**Why:** `action.onClicked` does not fire once `default_popup` is set, so click-to-capture and the badge feedback it drove are gone. Capture is now a button inside the popup, which is better anyway: it can report what was read rather than encoding it in an icon colour.
+
+### D-057 — Capture waits for the reader's message, not for the injection
+**Why:** `executeScript` resolves when the file is evaluated, not when the reader has finished, so the worker holds a one-shot resolver that the injected script's message settles. A five-second timeout turns a page that never reports into `JD_NOT_FOUND` rather than a promise that never resolves.
+
+### D-058 — The review screen shows rejections before it shows successes
+**Why:** rejected rewrites are the evidence that the anti-hallucination check is real. They are rendered first, in full, naming the unsupported detail and the original wording that was kept. Reworded bullets sit behind a disclosure, because they are the expected case. A guarantee the user cannot see is a guarantee they have no reason to believe.
+
 ## Known unknowns
 
 - Whether generic JD extraction actually works across LinkedIn, Indeed, Greenhouse, Lever and Workday without per-site adapters. Fixture tests in Phase 2 answer this. The manual-paste fallback exists because the answer may be no.
