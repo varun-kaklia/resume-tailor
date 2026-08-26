@@ -150,6 +150,23 @@ describe('nothing private reaches the wire', () => {
     expect(build(noted).user).not.toContain(NOTE_MARKER);
   });
 
+  it('leaves JobSpec fields that exist for the UI out of the prompt', () => {
+    const rich: JobSpec = {
+      ...spec,
+      responsibilities: ['RESPONSIBILITYMARKER own the billing platform end to end'],
+      location: 'LOCATIONMARKER',
+      workMode: 'hybrid',
+      minYearsExperience: 7,
+    };
+    const { user } = buildTailoringRequest(buildProfileIndex(profile), rich, ['d1']);
+
+    // These help the reviewer and local scoring; the model judges relevance from
+    // requirements and keywords, so sending them would be paid-for noise.
+    expect(user).not.toContain('RESPONSIBILITYMARKER');
+    expect(user).not.toContain('LOCATIONMARKER');
+    expect(user).not.toContain('hybrid');
+  });
+
   it('sends no note when the note is the only place a word appears', () => {
     const noted: Profile = {
       ...profile,

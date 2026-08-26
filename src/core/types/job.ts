@@ -35,6 +35,10 @@ export interface Requirement {
  * Produced by a heuristic keyword pass first; a model call fills the gaps only
  * when the heuristics come back thin.
  */
+export type Seniority = 'intern' | 'junior' | 'mid' | 'senior' | 'staff' | 'lead';
+
+export type WorkMode = 'remote' | 'hybrid' | 'onsite';
+
 export interface JobSpec {
   readonly title: string;
   readonly company?: string;
@@ -44,7 +48,19 @@ export interface JobSpec {
    * requirements themselves (tools, methodologies, domain language).
    */
   readonly keywords: readonly string[];
-  readonly seniority?: 'intern' | 'junior' | 'mid' | 'senior' | 'staff' | 'lead';
+  readonly seniority?: Seniority;
+  /**
+   * What the role does day to day, one entry per posted bullet.
+   *
+   * Kept for the review UI and for local relevance scoring. Not sent to a
+   * provider — it is the longest field here and the requirements already carry
+   * what the model needs to judge relevance.
+   */
+  readonly responsibilities?: readonly string[];
+  readonly location?: string;
+  readonly workMode?: WorkMode;
+  /** Lower bound of any stated experience range, in years. `5-7 years` yields 5. */
+  readonly minYearsExperience?: number;
   /** Stable hash of the source text. Cache key — identical postings never re-extract. */
   readonly sourceHash: string;
   /** True when heuristics alone produced this, i.e. it cost zero tokens. */

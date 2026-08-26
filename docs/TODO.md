@@ -49,8 +49,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 
 - [ ] `src/content/extract.ts` — generic readable-region extraction, no per-site selectors
 - [ ] Fallback: user selects text → context menu → capture
-- [ ] `src/core/prompt/jobspec.ts` — JD text → `JobSpec` (title, must-have, nice-to-have, keywords)
-- [ ] Heuristic keyword pass runs first; LLM call only fills gaps (token budget)
+- [x] `src/core/prompt/vocabulary.ts` — skill terms, section headings, ambiguity guards
+- [x] `src/core/prompt/jobspec.ts` — JD text → `JobSpec`, heuristics only, zero tokens
+- [x] `src/core/prompt/jobspec-fallback.ts` — gap-filling model call for unstructured postings
+- [x] Heuristic keyword pass runs first; LLM call only fills gaps (token budget)
 - [ ] Cache `JobSpec` by URL hash — re-tailoring the same posting costs zero tokens
 - [ ] Tests: fixture HTML from 5 boards → non-empty JobSpec
 

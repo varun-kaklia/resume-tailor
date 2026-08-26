@@ -23,7 +23,7 @@ export type {
 } from './profile';
 export { INDEX_BULLET_CHARS } from './profile';
 
-export type { JobPosting, JobSpec, Requirement, RequirementWeight } from './job';
+export type { JobPosting, JobSpec, Requirement, RequirementWeight, Seniority, WorkMode } from './job';
 export { MAX_JD_CHARS, MIN_JD_CHARS } from './job';
 
 export type {

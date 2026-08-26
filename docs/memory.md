@@ -133,6 +133,30 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 **Why:** smaller models wrap JSON in code fences or a sentence of prose despite being told not to. Retrying costs a real call, so a response whose only fault is packaging is unwrapped rather than rejected. A blank rewrite is dropped for the same reason — the bullet falls back to the user's original wording (D-021), which beats failing an otherwise sound plan over one bad entry.
 **Boundary:** the parser checks shape only. Whether an id exists is the profile's business and is decided by `core/tailor.ts`, which has the profile to check against.
 
+### D-030 — Job parsing matches a fixed vocabulary rather than inferring what a skill looks like
+**Why:** a posting can call anything a requirement, so pattern-guessing ("capitalised word near the word 'experience'") produces noise that looks like data. A known term found under a known heading is a fact. Terms outside the vocabulary are simply not extracted — a visible miss the user can correct, rather than a confident wrong answer they cannot spot.
+**Consequence:** `vocabulary.ts` needs occasional additions as tooling changes. That is maintenance, not a design flaw.
+
+### D-031 — Ambiguous skill terms require a technical signal on the same line
+**Why:** `go`, `c`, `r`, `rest`, `node` and `spring` are ordinary English. Matching them normally turns "please go to our careers page and read the rest of this posting" into two requirements. They are accepted only next to words like *experience*, *proficiency*, *programming*, *using*.
+**Trade-off:** a posting that names Go in a line with no technical vocabulary at all will miss it. Preferred over the alternative, which fills every requirement list with nonsense.
+
+### D-032 — Section headings decide must vs nice; an inline hedge can downgrade
+**Why:** postings mark optionality structurally ("Nice to have", "Preferred qualifications") far more reliably than they mark it in prose. Inline hedges ("Kubernetes is preferred") are handled as a second pass within a required section. A term named as required *anywhere* outranks the same term named as optional elsewhere, because under-claiming a skill costs the user a match.
+
+### D-033 — "About the role" is prose, not a duty list
+**Why:** treating it as a responsibilities heading pulled marketing copy into `responsibilities`. Prose headings now close the previous section without opening a collecting one. `job description` matters too — it is a document title on some boards, and reading it as a heading swallowed the labelled fields beneath it.
+
+### D-034 — The fallback asks only for the gaps, on a truncated posting
+**Why:** a posting with clear requirements but an unrecognisable title should cost one short question, not a full re-parse. The request carries `FALLBACK_CHARS` (2000) of the posting — titles and requirements sit near the top; the tail is benefits and legal boilerplate — and names only the missing fields.
+**Consequence:** a merge never overwrites a heuristic result. A value read from the posting's own structure is better evidence than one a model produced, and letting the model overwrite would make the free path pointless.
+
+### D-035 — A missing company never triggers a model call on its own
+**Why:** it is cosmetic, plenty of postings genuinely omit it, and it has no effect on which bullets get selected. Only a missing title or a requirement list too thin to tailor against justifies spending the user's money.
+
+### D-036 — New `JobSpec` fields are not automatically prompt fields
+**Why:** `responsibilities`, `location`, `workMode` and `minYearsExperience` exist for the review UI and local scoring. `responsibilities` is the longest field in the spec and the requirements already carry what the model needs to judge relevance, so sending it would be paid-for noise. Same allowlist discipline as D-025, enforced by a test that fails if any of them reaches the wire.
+
 ---
 
 ## Deferred, with the reason
