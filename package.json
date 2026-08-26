@@ -1,0 +1,26 @@
+{
+  "name": "resume-tailor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser extension that tailors your resume to a job posting from a structured profile, using your own AI provider key. Never invents content.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/varun-kaklia/resume-tailor.git" },
+  "bugs": { "url": "https://github.com/varun-kaklia/resume-tailor/issues" },
+  "homepage": "https://github.com/varun-kaklia/resume-tailor#readme",
+  "keywords": ["resume", "browser-extension", "manifest-v3", "latex", "job-search", "bring-your-own-key"],
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

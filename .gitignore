@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+*.zip
+*.crx
+*.xpi
+web-ext-artifacts/
+
+# Secrets — never commit a key
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Personal data — profile exports contain contact details
+*.profile.json
+profiles/
+
+# LaTeX build artefacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.pdf
+
+# Tooling caches
+.vite/
+coverage/
+.eslintcache
+*.tsbuildinfo
+.cache/
+
+# Agent / tooling local state
+ruvector.db
+*.rvf
+*.rvf.lock
+agentdb.*
+.claude-flow/
+.claude/
+.swarm/
+.hive-mind/
+memory/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*

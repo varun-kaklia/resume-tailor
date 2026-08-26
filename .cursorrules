@@ -1,0 +1,50 @@
+# ResumeTailor — AI editor rules
+# Full version: AI_RULES.md · Decisions: docs/memory.md · Design: docs/architecture.md
+
+## What this is
+Browser extension (MV3, Chrome/Firefox/Edge). One Structured Profile + one job
+description -> one page of LaTeX. Users bring their own AI key and model.
+
+## Invariants — never break
+1. src/core/ is pure TS: no chrome.*/browser.*, no fetch, no DOM, no imports from
+   providers/ ui/ background/ content/. Dependencies point inward only.
+2. The AI never authors facts. It returns item IDs + rephrasings of text it was
+   shown. Dates, employers, titles, contact and role notes are joined locally.
+3. Role notes are USER-AUTHORED free text (Experience.note). Never author,
+   default, suggest or hardcode note content anywhere. Rendered verbatim,
+   never sent to a model, never dropped by a plan.
+4. Profile item IDs (e1, e1b3, p2, s1) are permanent, never reused.
+5. One error type: AppError with an ErrorCode and a hand-written userMessage.
+   No bare `throw new Error()` outside core/types/errors.ts. No empty catch.
+6. No backend, no telemetry. Only outbound request: the user's chosen provider.
+7. One page mandatory. Overflow is surfaced with cuts, never silently truncated.
+
+## Content
+- Never invent a metric, technology or achievement not in the profile.
+- Never commit a real person's name, employer, dates or circumstances. Public repo;
+  fixtures use obviously-fictional companies.
+- Every number/proper noun in a rewritten bullet must exist in its source bullet
+  text or evidence, or the rewrite is rejected and the original is kept.
+- Google XYZ shape for bullets: accomplished [X] measured by [Y] by doing [Z].
+  Warn when missing; never block.
+
+## Tokens (the user pays)
+- Send IDs, not prose. Truncate the index to 90 chars per bullet.
+- Rewrite only selected bullets. Heuristics before any model call.
+- Cache by content hash. One call per tailoring. No streaming, no refine loops.
+
+## Code
+- TypeScript strict. No `any`; `unknown` at boundaries then narrow.
+- SOLID/DRY/KISS. No interface with one implementation. No dependency for what
+  20 lines can do — adding one requires an entry in docs/memory.md.
+- Files < 500 lines. Pure functions in core; side effects at the edges.
+- Comments say why, not what.
+- Import types from '@core/types', never from individual type files.
+
+## Process
+- Read the file (and docs/memory.md) before editing it.
+- Edit over create. No new docs unless asked.
+- Root holds only conventional files. Code in src/, tests in tests/, docs in docs/.
+- Never commit secrets or .env.
+- Record architectural decisions in docs/memory.md with the reason.
+- Update docs/TODO.md when a task is done.

@@ -1,0 +1,66 @@
+%% FAANGPath Simple Template — ResumeTailor render target.
+%% Upstream: https://www.overleaf.com/latex/templates/faangpath-simple-template
+%% Licence: MIT (FAANGPath). This adaptation keeps that licence.
+%%
+%% ===== SIZE KNOBS — START HERE IF THE RESUME RUNS ONTO A SECOND PAGE =====
+%% Change them top to bottom; each comment says roughly what it buys back.
+\documentclass[letterpaper,11pt]{article}   %% 1. FONT   11pt -> 10pt frees ~5 lines
+\usepackage[margin=0.5in]{geometry}         %% 2. MARGIN 0.5in -> 0.4in frees ~2 lines
+\newcommand{\rtBulletSep}{2pt}              %% 3. BULLET GAP  2pt -> 0pt frees ~2 lines
+\newcommand{\rtSectionSep}{6pt}             %% 4. SECTION GAP above each heading
+\newcommand{\rtNameSize}{\LARGE}            %% 5. NAME SIZE   \LARGE -> \Large frees ~1 line
+%% src/core/validate/fit.ts estimates against the DEFAULTS above. Shrinking a knob
+%% only makes its warning stale in your favour — it over-warns, never under-warns.
+%% =========================================================================
+
+%% ===== PLACEHOLDER MARKERS =====
+%% src/core/render/latex.ts substitutes every marker in ONE pass, so nothing it
+%% inserts is ever rescanned. A marker is a name wrapped in three angle brackets
+%% each side; the names are listed bare below precisely because writing them
+%% wrapped here would make this comment block substitutable too.
+%%
+%%   NAME        full name, escaped
+%%   CONTACT     one line: email, phone, location, links
+%%   SUMMARY     complete Summary section, or empty
+%%   EDUCATION   complete Education section, or empty
+%%   EXPERIENCE  complete Experience section, or empty
+%%   PROJECTS    complete Projects section, or empty
+%%   SKILLS      complete Skills section, or empty
+%%
+%% All seven must appear in the body below, and no other marker may, or the
+%% render throws RENDER_FAILED. Section bodies carry their own \section heading,
+%% so an empty section leaves no orphan rule behind.
+%% ================================
+
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\titleformat{\section}
+  {\vspace{\rtSectionSep}\scshape\raggedright\large}{}{0em}{}[\titlerule\vspace{-4pt}]
+\titlespacing{\section}{0pt}{\rtSectionSep}{2pt}
+
+\setlist[itemize]{leftmargin=0.15in, itemsep=\rtBulletSep, parsep=0pt, topsep=2pt, label=$\bullet$}
+
+\raggedbottom
+\raggedright
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0in}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{center}
+  {\rtNameSize \scshape <<<NAME>>>}\\ \vspace{2pt}
+  {\small <<<CONTACT>>>}
+\end{center}
+
+<<<SUMMARY>>>
+<<<EDUCATION>>>
+<<<EXPERIENCE>>>
+<<<PROJECTS>>>
+<<<SKILLS>>>
+
+\end{document}
