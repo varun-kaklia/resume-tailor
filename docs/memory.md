@@ -14,7 +14,7 @@ Rules for this file: append, do not rewrite history. When a decision is reversed
 3b. No real person's data ships in this repo — no names, employers, dates or circumstances in fixtures, defaults, examples or docs. It is public.
 4. Profile item IDs are permanent. Assigned on creation, never reused after deletion.
 5. One error type (`AppError`). Every code has a hand-written `userMessage`. No bare `throw new Error()` outside `core/types/errors.ts`.
-6. No backend. No telemetry. The only outbound request goes to the user's configured provider.
+6. No backend. No telemetry. The only outbound request goes to the user's configured provider. Quick Mode makes no outbound request at all. A hosted free-tier proxy would break this invariant and may not be added without an entry here superseding it (D-065).
 7. One page is mandatory. Overflow is surfaced, never silently truncated.
 
 ---
@@ -262,6 +262,38 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 
 ### D-064 — Extraction is gated on the provider screen, not reordered around it
 **Why:** reading a resume is a real API call, and the model is connected on step 3. Moving the connection to step 1 would open onboarding with an API-key form — the highest-friction screen first, before the user has seen anything work. Instead step 1 says a model is needed, offers the jump to step 3, and keeps "skip, fill it in by hand" open throughout, so a user without a key is never stuck on the first screen of an extension they just installed.
+
+### D-065 — Hybrid: the model upgrades stages, it does not gate the pipeline
+**Why:** requiring an API key before the first output means a new user's first experience of a resume tool is signing up for an AI provider. But the alternative usually taken — a hosted free tier — is a backend, and invariant 6 says there is none. The way out is that every stage of this pipeline already had, or could have, a local implementation: heuristic JD extraction shipped in Phase 2 and costs nothing, and selecting bullets by term overlap is arithmetic. So the model became an upgrade to individual stages rather than a precondition of the whole.
+**Consequence:** two modes over one pipeline (architecture §4a). Quick Mode is local end to end; Pro Mode swaps in a model at three specific stages. There is no third code path and no "demo mode" branch.
+
+### D-066 — Quick Mode returns real output, not a sample
+**Why:** a plan with no rewrites is a complete plan. D-021 already established that a bullet with no rewrite renders in the user's own words, so a local plan produces a genuine one-page resume — right bullets, right order, the candidate's own wording. Shipping that as a watermarked teaser would be a lie about what it is, and would train users to ignore the free path.
+**Consequence:** what a key buys is stated precisely and only that: bullets reworded toward the posting's language. Nothing in the UI may imply Quick Mode output is provisional, unfinished, or watermarked.
+
+### D-067 — Quick Mode is the most private mode, so "Pro" names capability, not trust
+**Why:** the mode that sends nothing anywhere is the free one. Naming the paid-effort path "Private" or "Secure" — the industry reflex — would be backwards and, worse, would imply Quick Mode is not. Pro means more capability: rewording, and better reading of unusual layouts.
+**Rule this establishes:** no copy in this product may describe Quick Mode as less private than BYOK. It is strictly more so.
+
+### D-068 — A local resume reader, with the model as the fallback
+**Why:** the same shape as `jobspec.ts` (D-030 onward): a heuristic pass that handles ordinary input for nothing, and a model call for the input it cannot follow. Resumes are more regular than job postings — headings, date ranges, bullet markers — so the heuristic floor is higher here than it is there.
+**Consequence:** `core/profile/read.ts` is the default import path in every mode, including for users who have a key. `core/prompt/import.ts` becomes the escape hatch for layouts the reader gives up on, rather than the only way in. Date normalisation moved to `core/profile/dates.ts` so both use one implementation and cannot disagree.
+
+### D-069 — The local planner may select and order, never write
+**Why:** it is the anti-hallucination argument again, arrived at from the other side. A local planner *could* trivially generate text — string templates, verb substitution — and it would be the single easiest place in this codebase to start inventing achievements, with no provider boundary and no evidence validator in the way. So its output type is deliberately the same `TailoringPlan` a model returns, with `rewrites` always empty.
+**Consequence:** it goes through `validatePlan` like any other plan. An empty rewrite list passes every check trivially, and that is the point: routing it around the validator is how a codebase eventually ships without one.
+
+### D-070 — A local plan is trimmed to fit before render, and what was cut is shown
+**Why:** `renderValidated` blocks on `over` (D-022) because a *model's* plan is not ours to edit. A local plan is: choosing fewer bullets is the planner's own job, so it drops the lowest-scoring bullets until `estimateFit` clears, rather than handing the user a block they cannot act on. Invariant 7 still holds — the result screen names every bullet left out, so the overflow is surfaced, never silent.
+**Boundary:** the trimming loop uses `fit.suggestedCuts`, so cut ranking stays in one place and Quick Mode cannot drift from what the estimator considers cheapest to lose.
+
+### D-071 — Quick Mode drafts a profile in the background and still will not save it
+**Why:** the whole point of the mode is that the second run is better than the first, which needs the parsed profile to persist. But D-060 says an import is a draft, never a write, and reading a resume badly is exactly as likely when it happens invisibly. So Quick Mode parses in the background and *offers* the result: the tailoring appears immediately, and saving the profile is a separate, visible act.
+**Consequence:** a user can tailor repeatedly without ever saving anything. That is a supported state, not a funnel to be closed.
+
+### D-072 — Manual paste is an entry point, not a fallback (delivers D-045)
+**Why:** live-board testing established that the reader cannot see the description on some sites at all, and that no amount of generic extraction fixes a page that renders its content behind an interaction. A paste box that only appears after a failure is a fallback; one that is simply there is an entry point, and it is the only capture route that works everywhere.
+**Consequence:** Quick Mode's job-description box is a plain textarea, always present, with page capture as the convenience on top rather than the other way round. The popup's paste box (still open) is the same decision applied to the other surface.
 
 ## Known unknowns
 

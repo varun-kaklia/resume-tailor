@@ -2,9 +2,16 @@
 
 Tailor your resume to a job posting in one click — without letting an AI make things up about you.
 
-ResumeTailor keeps one **Structured Profile** of your real experience. For each job posting, it selects and rephrases *only what is already in that profile* into a one-page LaTeX resume. You bring your own API key and pick your own model. Nothing leaves your browser except the request you chose to make.
+ResumeTailor keeps one **Structured Profile** of your real experience. For each job posting, it selects and rephrases *only what is already in that profile* into a one-page LaTeX resume.
 
-> **Status: early.** The extension builds and installs, and can capture a job posting from a page. There is no user interface yet — no profile editor, no tailoring flow. See [docs/TODO.md](docs/TODO.md).
+It works two ways, and the first needs nothing at all:
+
+- **Quick Mode** — paste your resume and a job posting and get a tailored page. Reading both, choosing the bullets, ordering them and fitting the page all happen in this browser. No account, no API key, no request leaves the machine.
+- **Pro Mode** — connect your own key and model, and the bullets are also reworded toward the posting's language. That is the entire difference.
+
+Quick Mode is the more private of the two, not the lesser one: it sends nothing anywhere. Nothing is ever invented in either mode — the model may only select, order and rephrase what your profile already contains.
+
+> **Status: early, but usable end to end.** The extension builds and installs. Quick Mode tailors a pasted resume against a pasted posting and exports the `.tex`; there is a profile editor, a resume importer and BYOK settings. Not yet: PDF import, Firefox and Edge builds, and a store listing. See [docs/TODO.md](docs/TODO.md).
 
 ---
 

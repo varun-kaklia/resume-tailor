@@ -10,6 +10,8 @@ Three constraints shape every decision below:
 2. **Provider-agnostic.** Users bring their own key and model. Core code has never heard of OpenAI.
 3. **Token efficiency is architectural, not a prompt trick.** The model receives an index, not a resume, and returns a plan, not a document.
 
+A fourth, added later and covered in §4a: **an API key buys better output, never the first output.** Every stage of the pipeline has a local implementation, so the tool works — genuinely, not as a demo — before the user has configured anything.
+
 ---
 
 ## 2. Tech stack
@@ -97,6 +99,38 @@ flowchart LR
 ```
 
 Read the arrows carefully: **the profile reaches the renderer directly.** The model's plan only says *which* items and *how they are worded*. Full text — contact details, dates, role notes — is joined in locally. A compromised or hallucinating model cannot change a date.
+
+---
+
+## 4a. Two modes, one pipeline
+
+The pipeline has four stages, and a model is an *upgrade to individual stages* rather than a requirement of the whole. Each stage has a local implementation that costs nothing and sends nothing:
+
+| Stage | Local (Quick Mode) | Model-assisted (Pro Mode) |
+|-------|--------------------|---------------------------|
+| Resume text → `Profile` | `core/profile/read.ts` — headings, date ranges, bullet markers | `core/prompt/import.ts` — one call, for layouts the reader cannot follow |
+| JD text → `JobSpec` | `core/prompt/jobspec.ts` — vocabulary match, already the default | `core/prompt/jobspec-fallback.ts` — fills gaps only when heuristics come back thin |
+| `Profile` + `JobSpec` → `TailoringPlan` | `core/plan/local.ts` — selects and orders by term overlap. **No rewording** | `core/prompt/messages.ts` — selects, orders *and* rewords toward the posting's language |
+| Plan → `.tex` | identical — `core/tailor.ts`, then `core/render/latex.ts` | identical |
+
+**Quick Mode is not a preview.** A plan with no rewrites is a complete plan: with no rewrite for a bullet id the renderer falls back to the profile's own text (D-021), so the output is a real one-page resume with the right bullets in the right order, in the user's own words. What a key buys is the fourth column of the third row — bullets reworded toward the posting's wording — and nothing else.
+
+This makes the privacy story the opposite of the usual one. **Quick Mode is the most private mode**, not the degraded one: nothing leaves the browser at all, because nothing needs to. "Pro" names a capability, not a tier of trust.
+
+```
+                  no key                       with key
+resume ──▶ read.ts ────────┐      resume ──▶ import.ts ──┐
+                           ▼                             ▼
+                      Profile (draft, saved only when the user says so)
+                           │
+JD ──▶ jobspec.ts ─────────┤      JD ──▶ jobspec + fallback
+                           ▼
+             plan/local.ts │ prompt/messages.ts + parse.ts
+                           ▼
+              validate ──▶ render ──▶ one page of .tex
+```
+
+A third tier — a hosted free-tier endpoint for users who want rewording without a key of their own — slots in as one more `ProviderId` and changes nothing else. It is not built, and it cannot be built without amending invariant 6 in `docs/memory.md` first: a proxy is a backend, and this codebase currently promises there is none. See D-065 to D-072.
 
 ---
 
@@ -235,6 +269,8 @@ The instruction "never invent content" is not a defence; it is a request. The st
 **Resume import is the one call where the model does see full text**, because it is transcribing a document the user supplied rather than writing about them. The defences there are different in mechanism and identical in intent: it is told to keep the candidate's wording and add no fact; it cannot return a role note (no such key in the response shape) or an ID (allocated locally); a date it cannot read comes back blank rather than guessed; and nothing it produces is written to storage until the user has seen every field and pressed save. See decisions D-060 to D-064.
 
 A failed evidence check is not a silent fallback. The user is shown the offending bullet and the original, and chooses: keep original, or retry.
+
+**Quick Mode cannot fabricate at all**, by construction rather than by checking: a local plan is a list of ids the planner chose from the profile, with an empty `rewrites` array. There is no generated text in it to validate. It still goes through `validatePlan` unchanged — an empty rewrite list passes every check — because a second code path around the validator is exactly how one eventually ships without it.
 
 ---
 

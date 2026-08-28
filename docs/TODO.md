@@ -7,7 +7,28 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 
 ---
 
-## Phase 0 — Foundation (current)
+## Phase 6 — Hybrid experience (current)
+
+**Goal:** a new user pastes a resume and a job description and gets a tailored one-page `.tex`, with no account, no key and no setup. A key upgrades the output; it never gates it.
+**Success criteria:** first run produces real output with zero configuration; the profile it parsed is offered, never saved behind the user's back; nothing leaves the browser in Quick Mode.
+
+- [x] Decide and document the Hybrid flow — architecture §4a, decisions D-065 to D-072
+- [x] `src/core/profile/dates.ts` — one date normaliser, shared by both import paths
+- [x] `src/core/profile/read.ts` — resume text → draft profile, heuristics only, zero tokens
+- [x] `src/core/plan/local.ts` — profile + JobSpec → plan by term overlap, `rewrites` always empty
+- [x] Trim-to-fit for local plans, reporting every bullet it left out (D-070)
+- [x] Quick Mode screen: paste resume + paste JD → tailored `.tex`, no key required
+- [x] Import reads locally first; the model call is the escape hatch, offered only when there is a key
+- [x] Manual JD paste as a first-class entry point (D-072, delivers D-045 for the options page)
+- [x] Tests: resume fixtures → profile, scoring and ordering, trim-to-fit, empty-rewrite plan through `validatePlan`
+- [ ] Quick Mode in the popup — capture the page into the same flow, with the paste box always present
+- [ ] "Improve these bullets with my model" — one button from a Quick result into the Pro path
+- [ ] Local skill-group ordering against the JD (currently ordered, not re-grouped)
+- [ ] Free-tier provider seam — needs invariant 6 amended before any proxy exists (D-065)
+
+---
+
+## Phase 0 — Foundation
 
 **Goal:** a repo any contributor (human or AI) can pick up without asking questions.
 **Success criteria:** all docs below exist, `src/core/types` compiles under `strict: true`, no runtime code yet.
@@ -25,7 +46,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 
 ---
 
-## Phase 1 — Profile is the source of truth
+## Phase 1 — Profile is the source of truth (done)
 
 **Goal:** a user can enter and persist a Structured Profile; nothing else works without it.
 **Success criteria:** profile survives browser restart; invalid profile produces a field-level error, never a crash; a user-written role note round-trips byte-identical.

@@ -18,19 +18,18 @@
  * @see docs/architecture.md §5, docs/backlog.md P-19
  */
 
+import { toDateRange } from '../profile/dates';
 import { formatBulletId, formatId } from '../profile/ids';
 import { AppError } from '../types';
 import type {
   Bullet,
   CompletionRequest,
   Contact,
-  DateRange,
   Education,
   Experience,
   Profile,
   Project,
   SkillGroup,
-  YearMonth,
 } from '../types';
 
 /**
@@ -120,50 +119,6 @@ const textList = (value: unknown): string[] => list(value).map(text).filter((ent
 const optional = <K extends string>(key: K, value: string): { [P in K]?: string } =>
   (value === '' ? {} : { [key]: value }) as { [P in K]?: string };
 
-const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-
-/**
- * Normalises what resumes actually say into `YYYY-MM`.
- *
- * The prompt asks for `YYYY-MM` and models usually comply, but "Mar 2022" is
- * what the source says and one non-compliant answer per import would put the
- * user back in the date fields by hand. Anything unrecognised becomes `''`
- * rather than a guess — see the note on `dates` below.
- */
-const toYearMonth = (value: unknown): string => {
-  const raw = text(value).toLowerCase();
-  if (raw === '') return '';
-  if (/^(present|current|now|ongoing|to date)$/.test(raw)) return 'present';
-
-  const iso = /^(\d{4})[-/.](\d{1,2})$/.exec(raw);
-  if (iso?.[1] !== undefined && iso[2] !== undefined) {
-    const month = Number(iso[2]);
-    return month >= 1 && month <= 12 ? `${iso[1]}-${String(month).padStart(2, '0')}` : '';
-  }
-
-  const named = /^([a-z]{3,9})\.?,?\s+(\d{4})$/.exec(raw);
-  if (named?.[1] !== undefined && named[2] !== undefined) {
-    const month = MONTHS.indexOf(named[1].slice(0, 3));
-    return month === -1 ? '' : `${named[2]}-${String(month + 1).padStart(2, '0')}`;
-  }
-  return '';
-};
-
-/**
- * A date the model could not find stays blank, and blank is not a `YearMonth`.
- *
- * The cast is deliberate: a draft is allowed to be invalid. `validateProfile`
- * rejects a blank date, so the editor shows "From" as a field needing
- * attention and the save button stays shut until the user supplies it. The
- * alternative — defaulting to a plausible month — writes a date nobody typed
- * into a document about their career, which is the one thing this codebase
- * does not do.
- */
-const dates = (start: unknown, end: unknown): DateRange => ({
-  start: toYearMonth(start) as YearMonth,
-  end: toYearMonth(end) as YearMonth,
-});
-
 const bullets = (value: unknown, parentId: string): Bullet[] =>
   textList(value).map((line, index) => ({ id: formatBulletId(parentId, index + 1), text: line }));
 
@@ -223,7 +178,7 @@ export const parseImportedProfile = (raw: string): Profile => {
       id,
       company: text(entry['company']),
       title: text(entry['title']),
-      dates: dates(entry['start'], entry['end']),
+      dates: toDateRange(entry['start'], entry['end']),
       ...optional('location', text(entry['location'])),
       bullets: bullets(entry['bullets'], id),
     }),
@@ -254,7 +209,7 @@ export const parseImportedProfile = (raw: string): Profile => {
       institution: text(entry['institution']),
       degree: text(entry['degree']),
       field: text(entry['field']),
-      dates: dates(entry['start'], entry['end']),
+      dates: toDateRange(entry['start'], entry['end']),
       ...optional('grade', text(entry['grade'])),
       ...optional('location', text(entry['location'])),
     }),
