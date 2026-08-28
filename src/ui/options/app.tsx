@@ -39,7 +39,14 @@ const Field = ({
   </label>
 );
 
-export const SettingsPanel = () => {
+export const SettingsPanel = ({
+  onDone,
+  doneLabel,
+}: {
+  /** Called after a successful save. Drives the setup sequence. */
+  onDone?: (() => void) | undefined;
+  doneLabel?: string | undefined;
+} = {}) => {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [loaded, setLoaded] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -87,6 +94,7 @@ export const SettingsPanel = () => {
     try {
       await saveSettings(toConfig(draft));
       setStatus({ kind: 'ok', message: 'Saved.' });
+      onDone?.();
     } catch (thrown) {
       setStatus({ kind: 'error', message: isAppError(thrown) ? thrown.userMessage : 'Could not save settings.' });
     }
@@ -153,7 +161,7 @@ export const SettingsPanel = () => {
 
       <div class="actions">
         <button type="button" onClick={() => void save()}>
-          Save
+          {doneLabel ?? 'Save'}
         </button>
         <button type="button" class="secondary" onClick={() => void test()} disabled={status.kind === 'busy'}>
           Test connection

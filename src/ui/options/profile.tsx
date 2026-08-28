@@ -1,9 +1,14 @@
 /**
  * Profile editor.
  *
- * Scoped to round-trip editing: enter a profile, change it, save it, and get
- * the same thing back. Reordering and importing an existing resume are not
- * here yet.
+ * Round-trip editing: enter a profile, change it, save it, get the same thing
+ * back. Reordering is not here yet.
+ *
+ * `initial` seeds the fields from an imported draft instead of from storage —
+ * the import path hands the extraction here rather than saving it, so the user
+ * confirms every field before anything is written. Read once, on mount: it is a
+ * starting point, not a bound value, and the shell remounts the editor when a
+ * new import arrives.
  */
 
 import { useEffect, useState } from 'preact/hooks';
@@ -61,13 +66,23 @@ const Text = ({
   />
 );
 
-export const ProfileEditor = () => {
-  const [profile, setProfile] = useState<Profile>(emptyProfile);
-  const [loaded, setLoaded] = useState(false);
+export const ProfileEditor = ({
+  initial,
+  onDone,
+  doneLabel,
+}: {
+  initial?: Profile | undefined;
+  /** Called after a successful save. Drives the setup sequence. */
+  onDone?: (() => void) | undefined;
+  doneLabel?: string | undefined;
+} = {}) => {
+  const [profile, setProfile] = useState<Profile>(initial ?? emptyProfile);
+  const [loaded, setLoaded] = useState(initial !== undefined);
   const [showIssues, setShowIssues] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
   useEffect(() => {
+    if (initial !== undefined) return;
     loadProfile()
       .then((saved) => {
         if (saved !== undefined) setProfile(saved);
@@ -97,6 +112,7 @@ export const ProfileEditor = () => {
     try {
       await saveProfile(touch(profile));
       setStatus({ kind: 'ok', message: 'Profile saved.' });
+      onDone?.();
     } catch (thrown) {
       setStatus({ kind: 'error', message: isAppError(thrown) ? thrown.userMessage : 'Could not save your profile.' });
     }
@@ -132,8 +148,9 @@ export const ProfileEditor = () => {
     <div>
       <h1>Your profile</h1>
       <p class="lead">
-        Everything on a tailored resume comes from here. Nothing is invented — the AI selects and rewords what you
-        enter, and never adds to it.
+        {initial !== undefined
+          ? 'This is what was read from your resume. Check it — anything the model could not find is blank, and nothing saves until you say so.'
+          : 'Everything on a tailored resume comes from here. Nothing is invented — the AI selects and rewords what you enter, and never adds to it.'}
       </p>
 
       <section class="group">
@@ -291,7 +308,7 @@ export const ProfileEditor = () => {
 
       <div class="actions sticky">
         <button type="button" onClick={() => void save()}>
-          Save profile
+          {doneLabel ?? 'Save profile'}
         </button>
         {status.kind !== 'idle' ? <span class={`status status-${status.kind}`}>{status.message}</span> : null}
       </div>

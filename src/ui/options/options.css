@@ -191,3 +191,75 @@ button.small { padding: 0.35rem 0.7rem; font-size: 0.88rem; }
 @media (max-width: 30rem) {
   .pair { grid-template-columns: 1fr; }
 }
+
+/* Setup progress. The bar is the glance; the labels are the answer to "of what?". */
+.steps { margin-bottom: 2rem; }
+
+.steps-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.steps-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 220ms ease;
+}
+
+.steps-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.step { display: flex; align-items: center; gap: 0.4rem; }
+.step.current { color: var(--fg); font-weight: 600; }
+.step.done { color: var(--fg); }
+
+.step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.step.current .step-number { background: var(--accent); border-color: var(--accent); color: #fff; }
+.step.done .step-number { border-color: var(--accent); color: var(--accent); }
+
+.wizard-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+button.link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+input[type="file"] { padding: 0.45rem; background: var(--surface); cursor: pointer; }
+
+@media (max-width: 30rem) {
+  .steps-labels { font-size: 0.8rem; }
+}

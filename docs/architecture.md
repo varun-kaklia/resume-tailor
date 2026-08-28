@@ -51,7 +51,7 @@ resume-tailor/
 │   ├── core/              # pure TS. No DOM. No chrome.*. No fetch.
 │   │   ├── types/         # profile.ts job.ts tailoring.ts provider.ts errors.ts
 │   │   ├── profile/       # schema, stable IDs
-│   │   ├── prompt/        # profile+JobSpec -> compact messages; response parsing
+│   │   ├── prompt/        # profile+JobSpec -> compact messages; response parsing; resume import
 │   │   ├── validate/      # evidence check, XYZ linter, one-page fit
 │   │   └── render/        # TailoringPlan -> .tex
 │   ├── providers/         # openai.ts anthropic.ts gemini.ts openai-compatible.ts registry.ts
@@ -231,6 +231,8 @@ The instruction "never invent content" is not a defence; it is a request. The st
 2. The model returns **IDs plus rewrites**. An ID that is not in the profile is rejected outright.
 3. **Evidence validation** (`core/validate/evidence.ts`): every number, percentage, currency amount, and capitalised proper noun in a rewritten bullet must appear in the *source* bullet it claims to rewrite. "Reduced latency by 40%" is rejected unless the source says 40%.
 4. Dates, employers, titles, contact details and role notes **never pass through the model at all** — they are joined locally at render.
+
+**Resume import is the one call where the model does see full text**, because it is transcribing a document the user supplied rather than writing about them. The defences there are different in mechanism and identical in intent: it is told to keep the candidate's wording and add no fact; it cannot return a role note (no such key in the response shape) or an ID (allocated locally); a date it cannot read comes back blank rather than guessed; and nothing it produces is written to storage until the user has seen every field and pressed save. See decisions D-060 to D-064.
 
 A failed evidence check is not a silent fallback. The user is shown the offending bullet and the original, and chooses: keep original, or retry.
 

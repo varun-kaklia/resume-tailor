@@ -239,6 +239,30 @@ The guarantee was worth keeping; the mechanism was not. `Experience.note` is now
 ### D-058 — The review screen shows rejections before it shows successes
 **Why:** rejected rewrites are the evidence that the anti-hallucination check is real. They are rendered first, in full, naming the unsupported detail and the original wording that was kept. Reworded bullets sit behind a disclosure, because they are the expected case. A guarantee the user cannot see is a guarantee they have no reason to believe.
 
+### D-059 — First run is a sequence, returning visits are tabs
+**Why:** the three setup steps depend on each other — read a resume, check what was read, connect the model that will tailor it — and tabs present them as three equal choices to someone who does not yet know what any of them are for. Once a profile exists the sequence has done its job, so the same three panels become tabs, which is the right shape for coming back to change one thing.
+**Consequence:** `Shell` decides on load: no saved profile means setup, anything else means tabs. A storage read that *fails* lands in tabs — a failed read is not evidence of a first run, and re-running setup over an existing profile is the worse mistake.
+**Progress bar:** a filled track plus the three step names. The bar alone says "there is more" without saying what, which is the part people want before starting.
+
+### D-060 — An import is a draft, never a write
+**Why:** extraction is a model reading a document, and it will misread some of it. Saving first and asking later means the first thing a new user sees is their own resume, subtly wrong, already stored. The extracted profile is held in the shell's state and handed to the editor as a seed; the first write to storage is a save the user clicked. This is P-19's "user confirms every field" made structural rather than procedural.
+**Consequence:** `ProfileEditor` takes an optional `initial` that is read once on mount instead of loading from storage. The shell remounts it (keyed on an import counter) when a new draft arrives, and drops the draft after a save so later edits are never overwritten by a stale import.
+
+### D-061 — The importer may not produce a role note, and does not allocate ids
+**Why:** two things the model must not author, for different reasons. A **note** is the user's own words about their own circumstances (D-024) — a model that inferred "contract role" from a date gap would be inventing precisely the fact that matters most, so there is no `note` key in the response shape and a test asserts one never survives parsing. **IDs** are permanent by invariant 4; assigning them locally from `profile/ids` keeps that a property of this codebase rather than a request in a prompt.
+**Also:** the import prompt tells the model it is transcribing, not writing — keep the candidate's wording, add no fact, and never compose a summary that is not already in the text.
+
+### D-062 — A date the importer cannot read stays blank
+**Why:** resumes say "Mar 2022", so the parser normalises the formats people actually write into `YYYY-MM`. Anything it still cannot read becomes `''`, which is deliberately not a valid `YearMonth`: `validateProfile` rejects it, the editor flags the field, and the save button stays shut until the user supplies it. The alternative — defaulting to a plausible month — writes a date nobody typed into a document about someone's career.
+**Consequence:** a draft profile is allowed to be invalid. That is what the review step is for.
+
+### D-063 — Import takes pasted text, not a PDF
+**Why:** pdf.js is ~350 KB in the options bundle to extract text that a user can produce with ⌘A in any PDF viewer, and it extracts two-column resumes badly enough that the model then has to cope with scrambled reading order. Paste and `.txt` cost nothing and work today.
+**Reverse if:** users actually stall at this screen. The extraction path takes a string, so adding a PDF reader in front of it changes one file.
+
+### D-064 — Extraction is gated on the provider screen, not reordered around it
+**Why:** reading a resume is a real API call, and the model is connected on step 3. Moving the connection to step 1 would open onboarding with an API-key form — the highest-friction screen first, before the user has seen anything work. Instead step 1 says a model is needed, offers the jump to step 3, and keeps "skip, fill it in by hand" open throughout, so a user without a key is never stuck on the first screen of an extension they just installed.
+
 ## Known unknowns
 
 - Whether generic JD extraction actually works across LinkedIn, Indeed, Greenhouse, Lever and Workday without per-site adapters. Fixture tests in Phase 2 answer this. The manual-paste fallback exists because the answer may be no.

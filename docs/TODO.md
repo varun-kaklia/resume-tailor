@@ -38,7 +38,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] Options page: profile editor (contact, education, experience, projects, skills) — round-trip editing
 - [ ] Profile editor: reordering roles, projects and bullets
 - [x] Options page: per-role note field, with the character budget shown as the user types
-- [ ] Import: paste existing resume text → draft profile (single LLM call, user confirms every field)
+- [x] `src/core/prompt/import.ts` — resume text → draft profile, one call, ids assigned locally
+- [x] Import screen: paste or open a `.txt`, gated on a configured provider, always skippable
+- [x] Editor seeds from an imported draft; nothing is written until the user saves (D-060)
+- [x] First-run setup sequence — import → review → connect — with a progress bar (D-059)
+- [ ] Import from PDF (text extraction in-page; measure the pdf.js bundle first — see D-063)
 - [ ] Export/import profile as JSON (user owns their data)
 - [ ] Tests: round-trip persistence, note round-trip, ID stability across edits
 
@@ -111,6 +115,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] Popup: capture → tailor → review → export, four states, no dead ends
 - [x] Selection-first capture (select text, then capture) with an inline hint on failure
 - [ ] Paste-a-description box in the popup, for pages the reader cannot see at all (D-045)
-- [ ] Every `AppError` code has a written user-facing message
+- [ ] Host access for the configured provider origin — `optional_host_permissions` plus a
+      runtime request on a user gesture. Extension pages only reach a host the manifest
+      declares or the provider CORS-allows; this affects the settings test, resume import
+      and worker tailoring alike, and Ollama blocks cross-origin by default
+- [x] Every `AppError` code has a written user-facing message — `CATALOGUE` is a
+      `Record<ErrorCode, …>`, so the compiler enforces it
 - [ ] Store listings, privacy policy ("your key and data never leave your browser except to your chosen provider")
 - [ ] CI: typecheck + test + build all three targets

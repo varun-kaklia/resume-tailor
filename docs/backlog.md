@@ -33,7 +33,7 @@ Priority: **P0** ship-blocking · **P1** first release · **P2** next release ·
 
 | ID | Task | Notes |
 |----|------|-------|
-| P-19 | Import existing resume text → draft profile | One LLM call; user confirms every field before it is written |
+| P-19 | ~~Import existing resume text → draft profile~~ **done** | One LLM call; user confirms every field before it is written. PDF input still open |
 | P-20 | `JobSpec` cache keyed by URL hash | Re-tailoring the same posting costs zero tokens |
 | P-21 | Profile export / import as JSON | Data ownership; also the bug-report format |
 | P-22 | Diff view: original bullet vs tailored bullet | Trust — user sees exactly what changed |
