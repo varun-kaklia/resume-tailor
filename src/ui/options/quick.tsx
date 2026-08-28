@@ -17,21 +17,16 @@
 
 import { useState } from 'preact/hooks';
 import template from '../../../templates/faangpath-simple.tex?raw';
+import { quickTailor } from '../../core/plan/quick';
 import { extractJobSpec } from '../../core/prompt/jobspec';
 import { readResume } from '../../core/profile/read';
-import { tailorLocally } from '../../core/plan/local';
-import { renderValidated, validatePlan } from '../../core/tailor';
-import { isAppError } from '../../core/types';
-import { MIN_JD_CHARS } from '../../core/types';
-import type { ItemId, JobSpec, Profile, ValidatedPlan } from '../../core/types';
+import { isAppError, MIN_JD_CHARS } from '../../core/types';
+import type { QuickResult } from '../../core/plan/quick';
+import type { JobSpec, Profile } from '../../core/types';
 
-interface Result {
-  readonly latex: string;
+interface Result extends QuickResult {
   readonly profile: Profile;
   readonly spec: JobSpec;
-  readonly validated: ValidatedPlan;
-  readonly trimmed: readonly ItemId[];
-  readonly unmatched: readonly string[];
   /** True when the profile came from the paste box rather than from storage. */
   readonly fromPaste: boolean;
 }
@@ -44,9 +39,6 @@ const download = (latex: string): void => {
   link.click();
   URL.revokeObjectURL(url);
 };
-
-const bulletCount = (validated: ValidatedPlan): number =>
-  [...validated.plan.experience, ...validated.plan.projects].reduce((total, section) => total + section.bulletIds.length, 0);
 
 export const QuickPanel = ({
   savedProfile,
@@ -74,18 +66,8 @@ export const QuickPanel = ({
     try {
       const profile = usingSaved && savedProfile !== undefined ? savedProfile : readResume(resume).profile;
       const { spec } = extractJobSpec({ text: job, capturedAt: new Date().toISOString(), source: 'paste' });
-      const local = tailorLocally(profile, spec);
-      const validated = validatePlan(local.plan, profile);
 
-      setResult({
-        latex: renderValidated(validated, profile, template),
-        profile,
-        spec,
-        validated,
-        trimmed: local.trimmed,
-        unmatched: local.unmatched,
-        fromPaste: !usingSaved,
-      });
+      setResult({ ...quickTailor(profile, spec, template), profile, spec, fromPaste: !usingSaved });
     } catch (thrown) {
       setResult(undefined);
       setError(isAppError(thrown) ? thrown.userMessage : 'Something went wrong reading that. Check both boxes and try again.');
@@ -161,7 +143,7 @@ export const QuickPanel = ({
             {result.spec.company !== undefined ? ` · ${result.spec.company}` : ''}
           </h2>
           <p class="field-hint">
-            {bulletCount(result.validated)} bullets selected and ordered against this posting, in your own words. Fit:{' '}
+            {result.selected} bullets selected and ordered against this posting, in your own words. Fit:{' '}
             {result.validated.fit.verdict} — an estimate, {result.validated.fit.estimatedLines} of{' '}
             {result.validated.fit.budgetLines} lines.
           </p>

@@ -115,3 +115,50 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .changes { margin: 0.5rem 0 0.9rem; }
 .changes summary { cursor: pointer; color: var(--muted); font-size: 0.87rem; }
+
+.input { margin-bottom: 0.85rem; }
+
+.label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.label { font-weight: 600; font-size: 0.87rem; }
+
+textarea {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  resize: vertical;
+}
+
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+button.link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: 0.4rem;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+button.link:disabled { opacity: 0.55; cursor: default; text-decoration: none; }
+
+.captured-line {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 0.87rem;
+}
+
+.ids { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.upgrade { margin-top: 0.75rem; padding-top: 0.7rem; border-top: 1px solid var(--line); }
+.upgrade .meta { margin: 0; }

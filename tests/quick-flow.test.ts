@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { extractJobSpec } from '../src/core/prompt/jobspec';
 import { tailorLocally } from '../src/core/plan/local';
+import { quickTailor } from '../src/core/plan/quick';
 import { readResume } from '../src/core/profile/read';
-import { renderValidated, validatePlan } from '../src/core/tailor';
 
 /**
- * The whole Quick Mode path, exactly as the panel runs it: two pasted strings
- * in, one page of LaTeX out, no provider anywhere. If this passes, a user with
- * no API key gets real output.
+ * The whole Quick Mode path, through the same `quickTailor` the popup and the
+ * options page both call: two pasted strings in, one page of LaTeX out, no
+ * provider anywhere. If this passes, a user with no API key gets real output.
  */
 const template = readFileSync(new URL('../templates/faangpath-simple.tex', import.meta.url), 'utf8');
 
@@ -60,8 +60,7 @@ describe('Quick Mode, end to end, with no provider', () => {
   const { profile } = readResume(RESUME);
   const { spec } = extractJobSpec({ text: POSTING, capturedAt: '2026-08-28T00:00:00.000Z', source: 'paste' });
   const local = tailorLocally(profile, spec);
-  const validated = validatePlan(local.plan, profile);
-  const latex = renderValidated(validated, profile, template);
+  const { latex, validated, selected, trimmed, unmatched } = quickTailor(profile, spec, template);
 
   it('reads the posting without a model', () => {
     expect(spec.heuristicOnly).toBe(true);
@@ -92,6 +91,12 @@ describe('Quick Mode, end to end, with no provider', () => {
   it('fits one page and says what it could not answer', () => {
     expect(validated.fit.verdict).not.toBe('over');
     // Reported as the posting spelled it, not lower-cased for the machine's convenience.
-    expect(local.unmatched).toContain('Rust');
+    expect(unmatched).toContain('Rust');
+  });
+
+  it('counts the bullets it selected, which is what both screens display', () => {
+    expect(selected).toBe(local.plan.experience.flatMap((section) => section.bulletIds).length);
+    expect(selected).toBeGreaterThan(0);
+    expect(trimmed).toEqual([]);
   });
 });

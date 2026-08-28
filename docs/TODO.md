@@ -21,8 +21,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 - [x] Import reads locally first; the model call is the escape hatch, offered only when there is a key
 - [x] Manual JD paste as a first-class entry point (D-072, delivers D-045 for the options page)
 - [x] Tests: resume fixtures → profile, scoring and ordering, trim-to-fit, empty-rewrite plan through `validatePlan`
-- [ ] Quick Mode in the popup — capture the page into the same flow, with the paste box always present
-- [ ] "Improve these bullets with my model" — one button from a Quick result into the Pro path
+- [x] Quick Mode in the popup — paste or capture, tailor, export, with no key (D-073)
+- [x] `src/core/plan/quick.ts` — one local run shared by the popup and the options page
+- [x] "Improve with my model" from a Quick result into the Pro path, when a key and a saved profile exist
+- [x] Pasted postings enter the worker through the JobSpec cache, not a new message type (D-075)
+- [ ] Selection-preserving rewording, if the model dropping bullets turns out to matter (D-074)
+- [ ] Tailor a pasted, unsaved resume with the model — needs the profile off storage or into the contract (D-076)
 - [ ] Local skill-group ordering against the JD (currently ordered, not re-grouped)
 - [ ] Free-tier provider seam — needs invariant 6 amended before any proxy exists (D-065)
 
